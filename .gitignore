@@ -1,0 +1,9 @@
+/results/
+/src/interpretability_component/tests/.ipynb_checkpoints/
+/src/interpretability_component/tests/dsprites_tests/results/
+/src/interpretability_component/tests/results/
+/src/interpretability_component/data/
+/src/interpretability_component/tests/dsprites_tests/data/
+/src/interpretability_component/__pycache__/
+/src/interpretability_component/tests/dsprites_tests/__pycache__/
+.idea/
