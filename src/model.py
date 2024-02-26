@@ -25,19 +25,19 @@ class Encoder(BaseEncoder):
         )
 
         self.encode_3 = nn.Sequential(
-            nn.Conv1d(in_channels=32, out_channels=64, kernel_size=3, stride=1, padding=1),
+            nn.Conv1d(in_channels=32, out_channels=64, kernel_size=3, stride=4, padding=1),
             nn.BatchNorm1d(64),
             nn.LeakyReLU()
         )
 
         self.encode_4 = nn.Sequential(
-            nn.Conv1d(in_channels=64, out_channels=128, kernel_size=3, stride=1, padding=1),
+            nn.Conv1d(in_channels=64, out_channels=128, kernel_size=4, stride=2, padding=1),
             nn.BatchNorm1d(128),
             nn.LeakyReLU()
         )
 
-        self.embedding = nn.Linear(128 * 125, args.latent_dim)
-        self.log_var = nn.Linear(128 * 125, args.latent_dim)
+        self.embedding = nn.Linear(128 * 16, args.latent_dim)
+        self.log_var = nn.Linear(128 * 16, args.latent_dim)
 
     def forward(self, x):
 
@@ -63,29 +63,29 @@ class Decoder(BaseDecoder):
         self.latent_dim = args.latent_dim
         self.n_channels = 1
 
-        self.linear = nn.Linear(args.latent_dim, 128*125)
+        self.linear = nn.Linear(args.latent_dim, 128*16)
 
         self.decode_1 = nn.Sequential(
-            nn.ConvTranspose1d(in_channels=128, out_channels=64, kernel_size=4, stride=2, padding=1),
+            nn.ConvTranspose1d(in_channels=128, out_channels=64, kernel_size=4, stride=4, padding=1),
             nn.BatchNorm1d(64),
             nn.LeakyReLU()
         )
 
         self.decode_2 = nn.Sequential(
-            nn.ConvTranspose1d(in_channels=64, out_channels=32, kernel_size=4, stride=2, padding=1),
+            nn.ConvTranspose1d(in_channels=64, out_channels=32, kernel_size=5, stride=4),
             nn.BatchNorm1d(32),
             nn.LeakyReLU()
         )
 
         self.decode_3 = nn.Sequential(
-            nn.ConvTranspose1d(in_channels=32, out_channels=self.n_channels, kernel_size=1, stride=1),
+            nn.ConvTranspose1d(in_channels=32, out_channels=self.n_channels, kernel_size=4, stride=2),
             nn.Sigmoid()
         )
 
     def forward(self, x):
 
         x = self.linear(x)
-        x = x.view(-1, 128, 125)
+        x = x.view(-1, 128, 16)
         x = self.decode_1(x)
         x = self.decode_2(x)
         x = self.decode_3(x)
