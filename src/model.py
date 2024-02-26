@@ -13,38 +13,39 @@ class Encoder(BaseEncoder):
         self.n_channels = 1
 
         self.encode_1 = nn.Sequential(
-            nn.Conv1d(in_channels=self.n_channels, out_channels=128, kernel_size=4, stride=2),
-            nn.BatchNorm1d(128),
-            nn.LeakyReLU()
-        )
-
-        self.encode_2 = nn.Sequential(
-            nn.Conv1d(in_channels=128, out_channels=64, kernel_size=4, stride=2),
-            nn.BatchNorm1d(64),
-            nn.LeakyReLU()
-        )
-
-        self.encode_3 = nn.Sequential(
-            nn.Conv1d(in_channels=64, out_channels=32, kernel_size=4, stride=5),
-            nn.BatchNorm1d(32),
-            nn.LeakyReLU()
-        )
-
-        self.encode_4 = nn.Sequential(
-            nn.Conv1d(in_channels=32, out_channels=16, kernel_size=4, stride=5),
+            nn.Conv1d(in_channels=self.n_channels, out_channels=16, kernel_size=4, stride=2, padding=1),
             nn.BatchNorm1d(16),
             nn.LeakyReLU()
         )
 
-        self.embedding = nn.Linear(80, args.latent_dim)
-        self.log_var = nn.Linear(80, args.latent_dim)
+        self.encode_2 = nn.Sequential(
+            nn.Conv1d(in_channels=16, out_channels=32, kernel_size=4, stride=2, padding=1),
+            nn.BatchNorm1d(32),
+            nn.LeakyReLU()
+        )
+
+        self.encode_3 = nn.Sequential(
+            nn.Conv1d(in_channels=32, out_channels=64, kernel_size=3, stride=1, padding=1),
+            nn.BatchNorm1d(64),
+            nn.LeakyReLU()
+        )
+
+        self.encode_4 = nn.Sequential(
+            nn.Conv1d(in_channels=64, out_channels=128, kernel_size=3, stride=1, padding=1),
+            nn.BatchNorm1d(128),
+            nn.LeakyReLU()
+        )
+
+        self.embedding = nn.Linear(128 * 125, args.latent_dim)
+        self.log_var = nn.Linear(128 * 125, args.latent_dim)
 
     def forward(self, x):
-         
+
         x = self.encode_1(x)
         x = self.encode_2(x)
         x = self.encode_3(x)
         x = self.encode_4(x)
+
         x = x.reshape(x.shape[0], -1)
 
         output = ModelOutput(
@@ -62,31 +63,33 @@ class Decoder(BaseDecoder):
         self.latent_dim = args.latent_dim
         self.n_channels = 1
 
-        self.linear = nn.Linear(args.latent_dim, 128*5)
+        self.linear = nn.Linear(args.latent_dim, 128*125)
 
         self.decode_1 = nn.Sequential(
-            nn.ConvTranspose1d(in_channels=128, out_channels=64, kernel_size=5, stride=5),
+            nn.ConvTranspose1d(in_channels=128, out_channels=64, kernel_size=4, stride=2, padding=1),
             nn.BatchNorm1d(64),
             nn.LeakyReLU()
         )
 
         self.decode_2 = nn.Sequential(
-            nn.ConvTranspose1d(in_channels=64, out_channels=32, kernel_size=5, stride=5),
+            nn.ConvTranspose1d(in_channels=64, out_channels=32, kernel_size=4, stride=2, padding=1),
             nn.BatchNorm1d(32),
             nn.LeakyReLU()
         )
 
         self.decode_3 = nn.Sequential(
-            nn.ConvTranspose1d(in_channels=32, out_channels=self.n_channels, kernel_size=4, stride=4),
+            nn.ConvTranspose1d(in_channels=32, out_channels=self.n_channels, kernel_size=1, stride=1),
             nn.Sigmoid()
         )
 
     def forward(self, x):
+
         x = self.linear(x)
-        x = x.view(x.shape[0], 128, 5)
+        x = x.view(-1, 128, 125)
         x = self.decode_1(x)
         x = self.decode_2(x)
         x = self.decode_3(x)
+
         output = ModelOutput(reconstruction=x)
 
         return output
