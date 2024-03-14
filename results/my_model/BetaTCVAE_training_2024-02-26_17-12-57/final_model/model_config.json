@@ -1,0 +1,1 @@
+{"name": "BetaTCVAEConfig", "input_dim": [1, 1, 500], "latent_dim": 8, "uses_default_encoder": false, "uses_default_decoder": false, "reconstruction_loss": "mse", "alpha": 0.8, "beta": 1.6, "gamma": 0.8, "use_mss": true}
